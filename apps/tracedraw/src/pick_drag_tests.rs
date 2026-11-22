@@ -196,6 +196,32 @@ fn ctrl_keeps_a_move_straight() {
     assert!(bounds(&app, id).y0 > b.y0 + 5.0);
 }
 
+#[test]
+fn dragging_a_selected_shape_from_an_overlap_moves_the_selected_shape() {
+    let (ctx, mut app, back) = setup();
+    let front = app
+        .new_shape(ShapeKind::Rect {
+            rect: Rect::new(30.0, 20.0, 80.0, 50.0),
+            radius: 0.0,
+            corners: None,
+        })
+        .expect("front rect");
+    app.apply_fill(tracedraw_core::Fill::Solid(tracedraw_core::Color::rgb8(
+        30, 30, 200,
+    )));
+    app.select(vec![back]);
+    let front_before = bounds(&app, front);
+    let back_before = bounds(&app, back);
+    let from = app.view.to_screen(Point::new(40.0, 25.0));
+    let to = from + egui::vec2(120.0, 80.0);
+
+    drag(&ctx, &mut app, from, to, Modifiers::NONE, Vec::new());
+
+    assert_eq!(app.selection, vec![back]);
+    assert_ne!(bounds(&app, back), back_before);
+    assert_eq!(bounds(&app, front), front_before);
+}
+
 /// Shift keeps a move horizontal or vertical as Ctrl does, and so does
 /// Cmd on macOS (#2480: a Shift drag went its own way, snapping to
 /// objects).

@@ -1210,6 +1210,14 @@ impl App {
         if let Some(id) = chain.iter().rev().find(|id| self.selection.contains(id)) {
             return Some(*id);
         }
+        if let Some(id) = self
+            .hits_at(p, false)
+            .into_iter()
+            .chain(self.hits_at(p, true))
+            .find(|id| self.selection.contains(id))
+        {
+            return Some(id);
+        }
         if ctrl {
             self.hit_test_step(p)
         } else {
